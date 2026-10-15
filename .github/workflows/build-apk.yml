@@ -1,7 +1,54 @@
-   cd مجلد-المشروع
-   git init
-   git add .
-   git commit -m "مؤتمراتي v6"
-   git branch -M main
-   git remote add origin https://github.com/اسمك/mo2tamarati.git
-   git push -u origin main
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Copy native LAN-host code
+        run: |
+          DIR=android/app/src/main/java/com/mo2tamarati/app
+          mkdir -p "$DIR"
+          cp native/*.java "$DIR"/
+
+      - name: Add permissions (internet, camera, keep awake)
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q "android.permission.CAMERA" "$M" || sed -i 's#<application#<uses-permission android:name="android.permission.CAMERA" />\n    <uses-permission android:name="android.permission.WAKE_LOCK" />\n    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />\n    <uses-feature android:name="android.hardware.camera" android:required="false" />\n    <application#' "$M"
+
+      - name: Generate icons
+        run: npx capacitor-assets generate --android
+
+      - name: Sync web files
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mo2tamarati-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
