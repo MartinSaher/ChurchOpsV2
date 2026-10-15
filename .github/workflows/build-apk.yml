@@ -1,0 +1,7 @@
+   cd مجلد-المشروع
+   git init
+   git add .
+   git commit -m "مؤتمراتي v6"
+   git branch -M main
+   git remote add origin https://github.com/اسمك/mo2tamarati.git
+   git push -u origin main
