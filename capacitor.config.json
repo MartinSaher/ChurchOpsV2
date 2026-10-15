@@ -1,0 +1,13 @@
+{
+  "appId": "com.mo2tamarati.app",
+  "appName": "مؤتمراتي",
+  "webDir": "www",
+  "backgroundColor": "#f4f3ee",
+  "server": {
+    "cleartext": true
+  },
+  "android": {
+    "adjustMarginsForEdgeToEdge": "auto",
+    "allowMixedContent": true
+  }
+}
